@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #define EXISTS 1
 #define NO_EXISTS 0
@@ -100,29 +101,27 @@ FILE*   openFile(const char* fileName);
 int     closeFile(FILE* file, const char* fileName);
 int     checkFile(const char* fileName);
 int     wrongInputFileParam(char const *argv[]);
-
-Line* readFile(const char* inputFile, int* lenDocument);
-int totalCharInFile(FILE* currentFile);
-char* charDetector(char* currentString, char* currentLine, char* stringDetected);
-int sameString(char* s1, char* s2);
-char* charToString(char currentChar);
-int isInPascal(char* currentString);
+Line*   readFile(const char* inputFile, int* lenDocument);
+int     totalCharInFile(FILE *currentFile);
+int     totalLineInFile(FILE* currentFile, int count);
+Line*   createDocument(int lineCount, int charCount);
+Line*   setLineDocument(Line* document, char* line, int pos);
+void    showDocument(Line* document, int line);
+void    freeDocument(Line* document, int countLine);
+char*   charDetector(char* currentString, char* currentLine, char* stringDetected);
+int     sameString(char* s1, char* s2);
+char*   charToString(char currentChar);
+int     isInPascal(char* currentString);
 int     analizadorLexico(int argc, char const *argv[]);
-char* concatString(char* currentString, char* nextChar);
-int totalLineInFile(FILE* currentFile, int count);
-Line* createDocument(int lineCount, int charCount);
-Line* setLineDocument(Line* document, char* line, int pos);
-void showDocument(Line* document, int line);
-void freeDocument(Line* document, int countLine);
-
-Word* detectorLexico(Line* document, int lenDocument);
-Word* createListWordNode();
-Word* insertWord(Word* listWord, char* word);
-int lenListWord(Word* L);
-void showListWord(Word* L);
-Word* freeListWordNode(Word* L, int pos);
-void freeBadString(char* string);
-int saveLexico(Word* saveLexico, const char* outputFile);
+char*   concatString(char* currentString, char* nextChar);
+Word*   detectorLexico(Line* document, int lenDocument);
+Word*   createListWordNode();
+Word*   insertWord(Word* listWord, char* word);
+int     lenListWord(Word* L);
+void    showListWord(Word* L);
+Word*   freeListWordNode(Word* L, int pos);
+void    freeBadString(char* string);
+int     saveLexico(Word* saveLexico, const char* outputFile);
 
 /*  Type 1
 
@@ -302,11 +301,11 @@ Line* readFile(const char* inputFile, int* lenDocument)
             int line = 0;
             while (0 == feof(currentFile))
             {
-                char* currentLine = (char*)malloc((count+2)*sizeof(char));
+                char* currentLine   = (char*)malloc((count+2)*sizeof(char));
                 fscanf(currentFile, "%s", currentLine);
-                newDocument = setLineDocument(newDocument, currentLine, line);
+                newDocument         = setLineDocument(newDocument, currentLine, line);
 
-                *lenDocument = *lenDocument + 1;
+                *lenDocument        = *lenDocument + 1;
                 line++;
             }                
             closeFile(currentFile, inputFile);
@@ -316,6 +315,52 @@ Line* readFile(const char* inputFile, int* lenDocument)
         return NULL;    
     }
     return NULL;
+}
+
+int totalCharInFile(FILE* currentFile)
+{
+    if (NULL == currentFile)
+    {
+        return 0;
+    }
+    
+    int count = -1;
+    while (0 == feof(currentFile))
+    {
+        char countLine[MAX_LEN_CHAR] = "";
+        fscanf(currentFile, "%c ", countLine);
+        count++;
+    }
+    rewind(currentFile);
+    #ifdef DEBUG
+        printf("total count = %d\n", count);
+    #endif
+    return count;
+}
+
+int totalLineInFile(FILE* currentFile, int count)
+{
+    if (NULL == currentFile && 0 >= count)
+    {
+        return 0;
+    }
+    
+    int totalLine = 0;
+    while (0 == feof(currentFile))
+    {
+        char* currentLine = (char*)malloc((count+2)*sizeof(char));
+        fscanf(currentFile, "%s", currentLine);
+        if (NULL != currentLine)
+        {
+            free(currentLine);
+        }
+        totalLine++;
+    }
+    rewind(currentFile);
+    #ifdef DEBUG
+        printf("total line = %d\n", totalLine);
+    #endif
+    return totalLine;
 }
 
 Line* createDocument(int lineCount, int charCount)
@@ -567,53 +612,6 @@ char* concatString(char* currentString, char* nextChar)
     return src;
 }
 
-
-int totalCharInFile(FILE* currentFile)
-{
-    if (NULL == currentFile)
-    {
-        return 0;
-    }
-    
-    int count = -1;
-    while (0 == feof(currentFile))
-    {
-        char countLine[MAX_LEN_CHAR] = "";
-        fscanf(currentFile, "%c ", countLine);
-        count++;
-    }
-    rewind(currentFile);
-    #ifdef DEBUG
-        printf("total count = %d\n", count);
-    #endif
-    return count;
-}
-
-int totalLineInFile(FILE* currentFile, int count)
-{
-    if (NULL == currentFile && 0 >= count)
-    {
-        return 0;
-    }
-    
-    int totalLine = 0;
-    while (0 == feof(currentFile))
-    {
-        char* currentLine = (char*)malloc((count+2)*sizeof(char));
-        fscanf(currentFile, "%s", currentLine);
-        if (NULL != currentLine)
-        {
-            free(currentLine);
-        }
-        totalLine++;
-    }
-    rewind(currentFile);
-    #ifdef DEBUG
-        printf("total line = %d\n", totalLine);
-    #endif
-    return totalLine;
-}
-
 int sameString(char* s1, char* s2)
 {
     if (0 == strcmp(s1, s2))
@@ -634,9 +632,22 @@ int saveLexico(Word* list, const char* outputFile)
             aux = list;
             while(aux!=NULL)
             {
-                fprintf(newFile, "%s\n", aux->word);
+                if (YES == sameString(aux->word, Pascal[13]))
+                {
+                    fprintf(newFile, "%s\n", aux->word);
+                }
+                else
+                {
+                    int i = 0;
+                    while (aux->word[i])
+                    {
+                        fprintf(newFile, "%c", toupper(aux->word[i]));
+                        i++;
+                    }
+                    fprintf(newFile, "\n");
+                }
                 aux = aux->nextWord;
-            }
+            }      
             return YES;
         }
     }
