@@ -122,6 +122,7 @@ void    showListWord(Word* L);
 Word*   freeListWordNode(Word* L, int pos);
 void    freeBadString(char* string);
 int     saveLexico(Word* saveLexico, const char* outputFile);
+int     saveEmptyFile(const char* outputFile);
 
 /*  Type 1
 
@@ -304,7 +305,6 @@ Line* readFile(const char* inputFile, int* lenDocument)
                 char* currentLine   = (char*)malloc((count+2)*sizeof(char));
                 fscanf(currentFile, "%s", currentLine);
                 newDocument         = setLineDocument(newDocument, currentLine, line);
-
                 *lenDocument        = *lenDocument + 1;
                 line++;
             }                
@@ -324,7 +324,7 @@ int totalCharInFile(FILE* currentFile)
         return 0;
     }
     
-    int count = -1;
+    int count = 0;
     while (0 == feof(currentFile))
     {
         char countLine[MAX_LEN_CHAR] = "";
@@ -658,6 +658,18 @@ int saveLexico(Word* list, const char* outputFile)
     return NO;
 }
 
+int saveEmptyFile(const char* outputFile)
+{
+    FILE* newFile = fopen(outputFile, "wb");
+    if (NULL != newFile)
+    {
+        fprintf(newFile, "\n");
+        return YES;
+    }      
+    return NO;
+}
+
+
 int analizadorLexico(int argc, char const *argv[])
 {
     if (NO == wrongInputParam(argc))
@@ -669,28 +681,41 @@ int analizadorLexico(int argc, char const *argv[])
             #endif
             int lenDocument = 0;
             Line* document = readFile(argv[1], &lenDocument);
-            if (NULL != document)
+            printf("%d", lenDocument);
+            if (0 == lenDocument)
             {
-                Word* listWord = detectorLexico(document, lenDocument);
-                if (NULL != listWord)
+                saveEmptyFile(argv[2]);
+            }
+            else
+            {
+                if (NULL != document)
                 {
-                    #ifdef DEBUG
-                        showListWord(listWord);
-                    #endif
-                    int saved = saveLexico(listWord, argv[2]);
-                    if (YES == saved)
+                    Word* listWord = detectorLexico(document, lenDocument);
+                    if (NULL != listWord)
                     {
-                        freeDocument(document, lenDocument);            
+                        #ifdef DEBUG
+                            showListWord(listWord);
+                        #endif
+                        int saved = saveLexico(listWord, argv[2]);
+                        if (YES == saved)
+                        {
+                            freeDocument(document, lenDocument);            
+                            return YES;
+                        }
+                        freeDocument(document, lenDocument);
+                        return NO;
+                    }
+                    else
+                    {
+                        saveEmptyFile(argv[2]);
+                        freeDocument(document, lenDocument);
                         return YES;
                     }
-                    freeDocument(document, lenDocument);
-                    return NO;
                 }
-                freeDocument(document, lenDocument);
                 return NO;
             }
-            return NO;
         }
+        return NO;
     }
     return NO;
 }
