@@ -374,7 +374,8 @@ Line* createDocument(int lineCount, int charCount)
     if (NULL != newDocument)
     {
         int line = 0;
-        for (int i = 0; i < lineCount; i++)
+        int i = 0;
+        for (i = 0; i < lineCount; i++)
         {
             newDocument[line].currentLine   = NULL;
             newDocument[line].len           = 0; 
@@ -402,7 +403,8 @@ void showDocument(Line* document, int line)
 {
     if (NULL != document && 0 <= line)
     {
-        for (int pos = 0; pos < line; pos++)
+        int pos = 0;
+        for (pos = 0; pos < line; pos++)
         { 
             #ifdef DEBUG
                 printf("\nChar %s\n", document[pos].currentLine);
@@ -416,7 +418,8 @@ void freeDocument(Line* document, int countLine)
 {
     if (NULL != document && 0 < countLine)
     {
-        for (int i = 0; i < countLine; i++)
+        int i = 0;
+        for (i = 0; i < countLine; i++)
         {
             if (NULL != document[i].currentLine)
             {
@@ -498,7 +501,8 @@ Word* detectorLexico(Line* document, int lenDocument)
     if (NULL != document && lenDocument >= 0)
     {
         Word* listWord = NULL;
-        for (int i = 0; i < lenDocument; i++)
+        int i = 0;
+        for (i = 0; i < lenDocument; i++)
         {
             int j = 0;
             while (j < document[i].len)
@@ -671,7 +675,7 @@ int analizadorLexico(int argc, char const *argv[])
                 if (NULL != listWord)
                 {
                     #ifdef DEBUG
-                    showListWord(listWord);
+                        showListWord(listWord);
                     #endif
                     int saved = saveLexico(listWord, argv[2]);
                     if (YES == saved)
