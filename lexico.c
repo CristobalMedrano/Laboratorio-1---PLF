@@ -681,7 +681,6 @@ int analizadorLexico(int argc, char const *argv[])
             #endif
             int lenDocument = 0;
             Line* document = readFile(argv[1], &lenDocument);
-            printf("%d", lenDocument);
             if (0 == lenDocument)
             {
                 saveEmptyFile(argv[2]);
