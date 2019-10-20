@@ -304,6 +304,9 @@ Line* readFile(const char* inputFile, int* lenDocument)
             {
                 char* currentLine   = (char*)malloc((count+2)*sizeof(char));
                 fscanf(currentFile, "%s", currentLine);
+                #ifdef DEBUG
+                    printf("%s\n", currentLine);
+                #endif
                 newDocument         = setLineDocument(newDocument, currentLine, line);
                 *lenDocument        = *lenDocument + 1;
                 line++;
@@ -509,13 +512,17 @@ Word* detectorLexico(Line* document, int lenDocument)
             {
                 char* currentLine   = document[i].currentLine;
                 char* firstChar     = charToString(currentLine[j]);
+                #ifdef DEBUG
+                    printf("%s %s\n", firstChar, currentLine);
+                #endif
+                
                 char* firstLine     = &currentLine[j+1];
                 char* detectedChar  = charDetector(firstChar, firstLine, "");
 
                 if (NULL != detectedChar)
                 {
                     #ifdef DEBUG
-                        //printf(" %s %p\n", detectedChar, detectedChar);
+                        printf(" %s %p\n", detectedChar, detectedChar);
                     #endif
                     listWord = insertWord(listWord, detectedChar);
                     j = j + (int)strlen(detectedChar) - 1;
@@ -544,6 +551,9 @@ void showListWord(Word* L)
 
 char* charToString(char currentChar)
 {   
+    #ifdef DEBUG
+        printf("%c\n", currentChar);
+    #endif
 	char* string = (char*)malloc(sizeof(char)*256);
 	if (NULL != string)
     {
@@ -556,6 +566,9 @@ char* charToString(char currentChar)
 
 char* charDetector(char* currentString, char* currentLine, char* stringDetected)
 {
+    #ifdef DEBUG
+            printf("%s\n", currentString);
+        #endif
     // El caso base es cuando la linea a leer se queda sin caracteres o cuando el largo del string a
     // leer supera al maximo caracter a ser detectado.
     if (0 == strlen(currentLine) || MAX_LEN_CHAR < (int)strlen(currentString))
@@ -578,6 +591,9 @@ char* charDetector(char* currentString, char* currentLine, char* stringDetected)
 
     if (YES == isInPascal(currentString))
     {
+        #ifdef DEBUG
+            printf("%s\n", stringDetected);
+        #endif
         stringDetected = currentString;
     }
     return charDetector(concatString(currentString, nextChar), nextLine, stringDetected);
@@ -681,7 +697,6 @@ int analizadorLexico(int argc, char const *argv[])
             #endif
             int lenDocument = 0;
             Line* document = readFile(argv[1], &lenDocument);
-            printf("%d", lenDocument);
             if (0 == lenDocument)
             {
                 saveEmptyFile(argv[2]);
